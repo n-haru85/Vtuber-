@@ -32,7 +32,7 @@
 
 <div id="selection-area" class="hidden">
   <div>
-    <p>髪型（1〜10）</p><div class="options" id="hair-list"></div>
+    <p>髪型（1〜47）</p><div class="options" id="hair-list"></div>
     <p>目（1〜5）</p><div class="options" id="eye-list"></div>
     <p>衣装（1〜5）</p><div class="options" id="clothes-list"></div>
     <p>体型（1〜4）</p><div class="options" id="taikei-list"></div>
@@ -64,23 +64,11 @@
   const db = firebase.database();
 
   // ==== 選択肢生成 ====
-  function createOptions(id,count){
+  function createOptions(id,count,startFromZero=false){
     const container=document.getElementById(id);
-    for(let i=0;i<count;i++){
-      const div=document.createElement('div');
-      div.textContent=i;
-      div.className='option';
-      div.onclick=()=> {
-        [...container.children].forEach(el=>el.classList.remove('selected'));
-        div.classList.add('selected');
-        updateViewer(); // 閲覧モード用に常時更新
-      };
-      container.appendChild(div);
-    }
-  }
-  function createOptionsFrom1(id,count){
-    const container=document.getElementById(id);
-    for(let i=1;i<=count;i++){
+    const start = startFromZero ? 0 : 1;
+    const end = startFromZero ? count-1 : count;
+    for(let i=start;i<=end;i++){
       const div=document.createElement('div');
       div.textContent=i;
       div.className='option';
@@ -93,12 +81,12 @@
     }
   }
 
-  createOptionsFrom1('hair-list',10);
-  createOptionsFrom1('eye-list',5);
-  createOptionsFrom1('clothes-list',5);
-  createOptionsFrom1('taikei-list',4);
-  createOptionsFrom1('seibetu-list',3);
-  createOptions('sousyoku-list',20); // 0~19
+  createOptions('hair-list',47);       // 1〜47
+  createOptions('eye-list',5);         // 1〜5
+  createOptions('clothes-list',5);     // 1〜5
+  createOptions('taikei-list',4);      // 1〜4
+  createOptions('seibetu-list',3);     // 1〜3
+  createOptions('sousyoku-list',20,true); // 0〜19
 
   function getSelected(id){
     const sel=document.querySelector(`#${id} .option.selected`);
@@ -134,7 +122,7 @@
     document.getElementById('mode-selection').classList.add('hidden');
     document.getElementById('selection-area').classList.remove('hidden');
     if(mode==='閲覧'){
-      document.getElementById('selection-area').classList.add('hidden'); // 閲覧モードは選択不可
+      document.getElementById('selection-area').classList.add('hidden'); // 閲覧は選択不可
       document.getElementById('viewer').classList.remove('hidden');
       // リアルタイム監視
       const ref=db.ref('currentSelection');
