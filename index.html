@@ -2,187 +2,143 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>キャラクターカタログ選択（アニメーション付き）</title>
+  <title>キャラクターカタログ（Firebaseリアルタイム）</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #1e1e2f;
-      color: #eee;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      border-radius: 12px;
-    }
-    h1 {
-      text-align: center;
-      color: #ffd700;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0;
-    }
-    li {
-      background: #2e2e3e;
-      margin: 6px 0;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease; /* アニメーション追加 */
-    }
-    li:hover {
-      transform: scale(1.05); /* ホバーで少し拡大 */
-      background: #3e3e5e;
-    }
-    li.selected {
-      background: #ffd700;
-      color: #000;
-      font-weight: bold;
-      transform: scale(1.1); /* 選択時少し大きくなる */
-    }
-    button {
-      margin-top: 16px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: #4caf50;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    button:hover {
-      background: #43a047;
-      transform: scale(1.05); /* ボタンも軽く拡大 */
-    }
-    .hidden { display: none; }
-    .result {
-      background: #2e2e3e;
-      padding: 16px;
-      border-radius: 8px;
-      margin-top: 20px;
-      opacity: 0;
-      transition: opacity 0.5s ease; /* フェードイン */
-    }
-    .result.visible {
-      opacity: 1;
-    }
+    body { font-family:"Segoe UI"; background:#1e1e2f; color:#eee; max-width:800px; margin:20px auto; padding:20px; border-radius:12px; }
+    h1 { text-align:center; color:#ffd700; }
+    .options { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .option { background:#2e2e3e; padding:8px 12px; border-radius:6px; cursor:pointer; min-width:40px; text-align:center; transition: all 0.2s ease; }
+    .option:hover { background:#3e3e5e; transform: scale(1.05); }
+    .option.selected { background:#ffd700; color:#000; font-weight:bold; transform: scale(1.1); }
+    button { margin-top:16px; padding:10px 20px; border:none; border-radius:8px; background:#4caf50; color:white; cursor:pointer; transition:0.2s; }
+    button:hover { background:#43a047; transform:scale(1.05); }
+    .hidden { display:none; }
+    #viewer { background:#2e2e3e; padding:20px; border-radius:8px; margin-top:20px; }
+    #summary-box { position:absolute; bottom:10px; right:10px; background:rgba(255,215,0,0.9); color:#000; padding:8px 12px; border-radius:6px; font-size:0.85em; }
+    input[type=number] { width:100px; padding:6px; border-radius:6px; border:1px solid #ccc; margin-bottom:12px; }
   </style>
 </head>
 <body>
 
-<h1>キャラクターカタログ選択</h1>
+<h1>キャラクターカタログ（Firebaseリアルタイム）</h1>
 
-<div id="selection-area">
-
-  <p>髪型を選んでください</p>
-  <ul id="hair-list"></ul>
-
-  <p>目を選んでください</p>
-  <ul id="eye-list"></ul>
-
-  <p>衣装を選んでください</p>
-  <ul id="clothes-list"></ul>
-
-  <p>体型を選んでください</p>
-  <ul id="taikei-list"></ul>
-
-  <p>性別を選んでください</p>
-  <ul id="seibetu-list"></ul>
-
-  <p>装飾を選んでください</p>
-  <ul id="sousyoku-list"></ul>
-
-  <p>身長（100〜200cm）</p>
-  <input type="number" id="height" min="100" max="200" step="0.1">
-
-  <button onclick="confirmSelection()">確認する</button>
+<div id="mode-selection">
+  <p>モードを選んでください：</p>
+  <button onclick="startMode('選ぶ')">選ぶ側</button>
+  <button onclick="startMode('閲覧')">閲覧モード</button>
 </div>
 
-<div id="result" class="result">
-  <h3>選択内容</h3>
-  <p id="summary"></p>
-  <p>これでよろしいですか？</p>
-  <button onclick="finalize('はい')">はい</button>
-  <button onclick="finalize('いいえ')">いいえ</button>
+<div id="selection-area" class="hidden">
+  <div>
+    <p>髪型（1〜10）</p><div class="options" id="hair-list"></div>
+    <p>目（1〜5）</p><div class="options" id="eye-list"></div>
+    <p>衣装（1〜5）</p><div class="options" id="clothes-list"></div>
+    <p>身長（100〜200cm）</p><input type="number" id="height" min="100" max="200" step="0.1">
+  </div>
+  <button onclick="sendSelection()">送信（Firebaseへ）</button>
 </div>
 
-<div id="thankyou" class="hidden">
-  <h2>選択ありがとうございました！</h2>
+<div id="viewer" class="hidden">
+  <h2>閲覧モード（リアルタイム）</h2>
+  <button onclick="restart()">最初から戻る</button>
+  <div id="summary-box-viewer"></div>
 </div>
 
 <script>
-  function createList(id, count){
-    const ul = document.getElementById(id);
+  // ==== Firebase 設定 ====
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ==== 選択肢生成 ====
+  function createOptions(id,count){
+    const container=document.getElementById(id);
     for(let i=1;i<=count;i++){
-      const li = document.createElement('li');
-      li.textContent = i;
-      li.onclick = ()=>{
-        [...ul.children].forEach(el=>el.classList.remove('selected'));
-        li.classList.add('selected');
+      const div=document.createElement('div');
+      div.textContent=i;
+      div.className='option';
+      div.onclick=()=> {
+        [...container.children].forEach(el=>el.classList.remove('selected'));
+        div.classList.add('selected');
       };
-      ul.appendChild(li);
+      container.appendChild(div);
+    }
+  }
+  createOptions('hair-list',10);
+  createOptions('eye-list',5);
+  createOptions('clothes-list',5);
+
+  function getSelected(id){
+    const sel=document.querySelector(`#${id} .option.selected`);
+    return sel?sel.textContent:null;
+  }
+
+  function getAllSelection(){
+    return {
+      hair:getSelected('hair-list'),
+      eye:getSelected('eye-list'),
+      clothes:getSelected('clothes-list'),
+      height:document.getElementById('height').value
+    };
+  }
+
+  function formatSummary(sel){
+    return `
+      髪型:${sel.hair||'-'}<br>
+      目:${sel.eye||'-'}<br>
+      衣装:${sel.clothes||'-'}<br>
+      身長:${sel.height?parseFloat(sel.height).toFixed(1):'-'} cm
+    `;
+  }
+
+  // ==== モード切替 ====
+  function startMode(mode){
+    document.getElementById('mode-selection').classList.add('hidden');
+    document.getElementById('selection-area').classList.remove('hidden');
+    if(mode==='閲覧'){
+      document.getElementById('viewer').classList.remove('hidden');
+      document.getElementById('selection-area').classList.add('hidden'); // 閲覧は送信不要
+      // リアルタイム監視
+      const ref=db.ref('currentSelection');
+      ref.on('value',(snapshot)=>{
+        const val=snapshot.val();
+        if(val) document.getElementById('summary-box-viewer').innerHTML=formatSummary(val);
+      });
     }
   }
 
-  createList('hair-list',76);
-  createList('eye-list',8);
-  createList('clothes-list',8);
-  createList('taikei-list',4);
-  createList('seibetu-list',3);
-  createList('sousyoku-list',20);
-
-  function getSelected(id){
-    const selected = document.querySelector(`#${id} li.selected`);
-    return selected ? selected.textContent : null;
-  }
-
-  function confirmSelection(){
-    const hair=getSelected('hair-list');
-    const eye=getSelected('eye-list');
-    const clothes=getSelected('clothes-list');
-    const taikei=getSelected('taikei-list');
-    const seibetu=getSelected('seibetu-list');
-    const sousyoku=getSelected('sousyoku-list');
-    const height=document.getElementById('height').value;
-
-    if(!hair||!eye||!clothes||!taikei||!seibetu||!sousyoku||!height){
+  // ==== 選ぶ側が送信 ====
+  function sendSelection(){
+    const sel=getAllSelection();
+    if(!sel.hair||!sel.eye||!sel.clothes||!sel.height){
       alert("すべての項目を選択してください。");
       return;
     }
-
-    const summary=`
-      髪型：${hair}<br>
-      目：${eye}<br>
-      衣装：${clothes}<br>
-      体型：${taikei}<br>
-      性別：${seibetu}<br>
-      装飾：${sousyoku}<br>
-      身長：${parseFloat(height).toFixed(1)} cm
-    `;
-    document.getElementById('summary').innerHTML=summary;
-    document.getElementById('selection-area').classList.add('hidden');
-    const resultDiv=document.getElementById('result');
-    resultDiv.classList.remove('hidden');
-    // フェードイン
-    setTimeout(()=>resultDiv.classList.add('visible'),10);
+    db.ref('currentSelection').set(sel);
+    alert("選択内容を送信しました！");
   }
 
-  function finalize(answer){
-    if(answer==='いいえ'){
-      document.getElementById('selection-area').classList.remove('hidden');
-      const resultDiv=document.getElementById('result');
-      resultDiv.classList.remove('visible');
-      setTimeout(()=>resultDiv.classList.add('hidden'),300); // フェードアウト
-    } else if(answer==='はい'){
-      document.getElementById('result').classList.remove('visible');
-      setTimeout(()=>{
-        document.getElementById('result').classList.add('hidden');
-        document.getElementById('thankyou').classList.remove('hidden');
-      },300);
-    }
+  // ==== 戻る ====
+  function restart(){
+    document.querySelectorAll('.option.selected').forEach(el=>el.classList.remove('selected'));
+    document.getElementById('height').value='';
+    document.getElementById('selection-area').classList.add('hidden');
+    document.getElementById('viewer').classList.add('hidden');
+    document.getElementById('mode-selection').classList.remove('hidden');
+    document.getElementById('summary-box-viewer').innerHTML='';
   }
 </script>
 
 </body>
 </html>
+
