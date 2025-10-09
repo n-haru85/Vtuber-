@@ -7,7 +7,7 @@
         body { font-family: Arial, sans-serif; margin: 20px; }
         .form-row { margin-top: 10px; }
         label { margin-right: 15px; }
-        select { width: 120px; }
+        select, input[type="number"] { width: 70px; }
         button { margin-top: 10px; }
         .result { margin-top: 20px; }
         .summary { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
@@ -21,63 +21,28 @@
 <form id="characterForm">
     <div class="form-row">
         <label>髪型
-            <select id="hear" required>
-                <option value="ショート">ショート</option>
-                <option value="ロング">ロング</option>
-                <option value="ポニーテール">ポニーテール</option>
-                <option value="ツインテール">ツインテール</option>
-            </select>
+            <select id="hear" required></select>
         </label>
         <label>目
-            <select id="eye" required>
-                <option value="丸目">丸目</option>
-                <option value="つり目">つり目</option>
-                <option value="垂れ目">垂れ目</option>
-                <option value="一重">一重</option>
-            </select>
+            <select id="eye" required></select>
         </label>
         <label>衣装
-            <select id="clorthes" required>
-                <option value="制服">制服</option>
-                <option value="私服">私服</option>
-                <option value="戦闘服">戦闘服</option>
-                <option value="ドレス">ドレス</option>
-            </select>
+            <select id="clorthes" required></select>
         </label>
     </div>
 
     <div class="form-row">
         <label>体型
-            <select id="taikei" required>
-                <option value="細身">細身</option>
-                <option value="普通">普通</option>
-                <option value="筋肉質">筋肉質</option>
-                <option value="ぽっちゃり">ぽっちゃり</option>
-            </select>
+            <select id="taikei" required></select>
         </label>
         <label>性別
-            <select id="seibetu" required>
-                <option value="男性">男性</option>
-                <option value="女性">女性</option>
-                <option value="その他">その他</option>
-            </select>
+            <select id="seibetu" required></select>
         </label>
         <label>装飾
-            <select id="sousyoku" required>
-                <option value="なし">なし</option>
-                <option value="帽子">帽子</option>
-                <option value="眼鏡">眼鏡</option>
-                <option value="アクセサリー">アクセサリー</option>
-            </select>
+            <select id="sousyoku" required></select>
         </label>
         <label>身長
-            <select id="sintyo" required>
-                <option value="150cm">150cm</option>
-                <option value="160cm">160cm</option>
-                <option value="170cm">170cm</option>
-                <option value="180cm">180cm</option>
-                <option value="190cm">190cm</option>
-            </select>
+            <input type="number" id="sintyo" min="100" max="200" required>cm
         </label>
     </div>
 
@@ -93,6 +58,25 @@
 <script>
 let characterList = [];
 
+// ドロップダウンを自動生成
+function populateSelect(id, start, end) {
+    const select = document.getElementById(id);
+    for (let i = start; i <= end; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        select.appendChild(option);
+    }
+}
+
+// 各項目の選択肢を生成
+populateSelect("hear", 1, 47);
+populateSelect("eye", 1, 8);
+populateSelect("clorthes", 1, 8);
+populateSelect("taikei", 1, 4);
+populateSelect("seibetu", 1, 3);
+populateSelect("sousyoku", 0, 19);
+
 function confirmCharacter() {
     const hear = document.getElementById("hear").value;
     const eye = document.getElementById("eye").value;
@@ -102,9 +86,14 @@ function confirmCharacter() {
     const sousyoku = document.getElementById("sousyoku").value;
     const sintyo = document.getElementById("sintyo").value;
 
+    if (sintyo < 100 || sintyo > 200) {
+        alert("身長は100～200cmで入力してください。");
+        return;
+    }
+
     const resultDiv = document.getElementById("result");
     resultDiv.innerHTML = `
-        <p>髪型: ${hear}, 目: ${eye}, 衣装: ${clorthes}, 体型: ${taikei}, 性別: ${seibetu}, 装飾: ${sousyoku}, 身長: ${sintyo}</p>
+        <p>髪型: ${hear}, 目: ${eye}, 衣装: ${clorthes}, 体型: ${taikei}, 性別: ${seibetu}, 装飾: ${sousyoku}, 身長: ${sintyo}cm</p>
         <p>でよろしいですか？</p>
         <button onclick="acceptCharacter()">はい</button>
         <button onclick="editCharacter()">いいえ</button>
@@ -138,7 +127,7 @@ function renderCharacterList() {
         div.className = "character";
         div.innerHTML = `
             <strong>${index + 1}:</strong>
-            髪型:${c.hear}, 目:${c.eye}, 衣装:${c.clorthes}, 体型:${c.taikei}, 性別:${c.seibetu}, 装飾:${c.sousyoku}, 身長:${c.sintyo}
+            髪型:${c.hear}, 目:${c.eye}, 衣装:${c.clorthes}, 体型:${c.taikei}, 性別:${c.seibetu}, 装飾:${c.sousyoku}, 身長:${c.sintyo}cm
             <button onclick="deleteCharacter(${index})">削除</button>
         `;
         summaryDiv.appendChild(div);
