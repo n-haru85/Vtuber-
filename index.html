@@ -35,6 +35,9 @@
     <p>髪型（1〜10）</p><div class="options" id="hair-list"></div>
     <p>目（1〜5）</p><div class="options" id="eye-list"></div>
     <p>衣装（1〜5）</p><div class="options" id="clothes-list"></div>
+    <p>体型（1〜4）</p><div class="options" id="taikei-list"></div>
+    <p>性別（1〜3）</p><div class="options" id="seibetu-list"></div>
+    <p>装飾品（0〜19）</p><div class="options" id="sousyoku-list"></div>
     <p>身長（100〜200cm）</p><input type="number" id="height" min="100" max="200" step="0.1">
   </div>
   <button onclick="sendSelection()">送信（Firebaseへ）</button>
@@ -51,94 +54,4 @@
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // ==== 選択肢生成 ====
-  function createOptions(id,count){
-    const container=document.getElementById(id);
-    for(let i=1;i<=count;i++){
-      const div=document.createElement('div');
-      div.textContent=i;
-      div.className='option';
-      div.onclick=()=> {
-        [...container.children].forEach(el=>el.classList.remove('selected'));
-        div.classList.add('selected');
-      };
-      container.appendChild(div);
-    }
-  }
-  createOptions('hair-list',10);
-  createOptions('eye-list',5);
-  createOptions('clothes-list',5);
-
-  function getSelected(id){
-    const sel=document.querySelector(`#${id} .option.selected`);
-    return sel?sel.textContent:null;
-  }
-
-  function getAllSelection(){
-    return {
-      hair:getSelected('hair-list'),
-      eye:getSelected('eye-list'),
-      clothes:getSelected('clothes-list'),
-      height:document.getElementById('height').value
-    };
-  }
-
-  function formatSummary(sel){
-    return `
-      髪型:${sel.hair||'-'}<br>
-      目:${sel.eye||'-'}<br>
-      衣装:${sel.clothes||'-'}<br>
-      身長:${sel.height?parseFloat(sel.height).toFixed(1):'-'} cm
-    `;
-  }
-
-  // ==== モード切替 ====
-  function startMode(mode){
-    document.getElementById('mode-selection').classList.add('hidden');
-    document.getElementById('selection-area').classList.remove('hidden');
-    if(mode==='閲覧'){
-      document.getElementById('viewer').classList.remove('hidden');
-      document.getElementById('selection-area').classList.add('hidden'); // 閲覧は送信不要
-      // リアルタイム監視
-      const ref=db.ref('currentSelection');
-      ref.on('value',(snapshot)=>{
-        const val=snapshot.val();
-        if(val) document.getElementById('summary-box-viewer').innerHTML=formatSummary(val);
-      });
-    }
-  }
-
-  // ==== 選ぶ側が送信 ====
-  function sendSelection(){
-    const sel=getAllSelection();
-    if(!sel.hair||!sel.eye||!sel.clothes||!sel.height){
-      alert("すべての項目を選択してください。");
-      return;
-    }
-    db.ref('currentSelection').set(sel);
-    alert("選択内容を送信しました！");
-  }
-
-  // ==== 戻る ====
-  function restart(){
-    document.querySelectorAll('.option.selected').forEach(el=>el.classList.remove('selected'));
-    document.getElementById('height').value='';
-    document.getElementById('selection-area').classList.add('hidden');
-    document.getElementById('viewer').classList.add('hidden');
-    document.getElementById('mode-selection').classList.remove('hidden');
-    document.getElementById('summary-box-viewer').innerHTML='';
-  }
-</script>
-
-</body>
-</html>
-
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.c
