@@ -54,4 +54,118 @@
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.c
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ==== 選択肢生成 ====
+  function createOptions(id,count){
+    const container=document.getElementById(id);
+    for(let i=0;i<count;i++){
+      const div=document.createElement('div');
+      div.textContent=i;
+      div.className='option';
+      div.onclick=()=> {
+        [...container.children].forEach(el=>el.classList.remove('selected'));
+        div.classList.add('selected');
+        updateViewer(); // 閲覧モード用に常時更新
+      };
+      container.appendChild(div);
+    }
+  }
+  function createOptionsFrom1(id,count){
+    const container=document.getElementById(id);
+    for(let i=1;i<=count;i++){
+      const div=document.createElement('div');
+      div.textContent=i;
+      div.className='option';
+      div.onclick=()=> {
+        [...container.children].forEach(el=>el.classList.remove('selected'));
+        div.classList.add('selected');
+        updateViewer(); // 閲覧モード用に常時更新
+      };
+      container.appendChild(div);
+    }
+  }
+
+  createOptionsFrom1('hair-list',10);
+  createOptionsFrom1('eye-list',5);
+  createOptionsFrom1('clothes-list',5);
+  createOptionsFrom1('taikei-list',4);
+  createOptionsFrom1('seibetu-list',3);
+  createOptions('sousyoku-list',20); // 0~19
+
+  function getSelected(id){
+    const sel=document.querySelector(`#${id} .option.selected`);
+    return sel?sel.textContent:null;
+  }
+
+  function getAllSelection(){
+    return {
+      hair:getSelected('hair-list'),
+      eye:getSelected('eye-list'),
+      clothes:getSelected('clothes-list'),
+      taikei:getSelected('taikei-list'),
+      seibetu:getSelected('seibetu-list'),
+      sousyoku:getSelected('sousyoku-list'),
+      height:document.getElementById('height').value
+    };
+  }
+
+  function formatSummary(sel){
+    return `
+      髪型:${sel.hair||'-'}<br>
+      目:${sel.eye||'-'}<br>
+      衣装:${sel.clothes||'-'}<br>
+      体型:${sel.taikei||'-'}<br>
+      性別:${sel.seibetu||'-'}<br>
+      装飾品:${sel.sousyoku||'-'}<br>
+      身長:${sel.height?parseFloat(sel.height).toFixed(1):'-'} cm
+    `;
+  }
+
+  // ==== モード切替 ====
+  function startMode(mode){
+    document.getElementById('mode-selection').classList.add('hidden');
+    document.getElementById('selection-area').classList.remove('hidden');
+    if(mode==='閲覧'){
+      document.getElementById('selection-area').classList.add('hidden'); // 閲覧モードは選択不可
+      document.getElementById('viewer').classList.remove('hidden');
+      // リアルタイム監視
+      const ref=db.ref('currentSelection');
+      ref.on('value',(snapshot)=>{
+        const val=snapshot.val();
+        if(val) document.getElementById('summary-box-viewer').innerHTML=formatSummary(val);
+      });
+    }
+  }
+
+  // ==== 選ぶ側が送信 ====
+  function sendSelection(){
+    const sel=getAllSelection();
+    if(!sel.hair||!sel.eye||!sel.clothes||!sel.taikei||!sel.seibetu||sel.sousyoku===null||!sel.height){
+      alert("すべての項目を選択してください。");
+      return;
+    }
+    db.ref('currentSelection').set(sel);
+    alert("選択内容を送信しました！");
+  }
+
+  // ==== 戻る ====
+  function restart(){
+    document.querySelectorAll('.option.selected').forEach(el=>el.classList.remove('selected'));
+    document.getElementById('height').value='';
+    document.getElementById('selection-area').classList.add('hidden');
+    document.getElementById('viewer').classList.add('hidden');
+    document.getElementById('mode-selection').classList.remove('hidden');
+    document.getElementById('summary-box-viewer').innerHTML='';
+  }
+</script>
+
+</body>
+</html>
