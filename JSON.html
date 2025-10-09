@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>JSON閲覧ツール</title>
+<style>
+  body { font-family:"Segoe UI"; background:#1e1e2f; color:#eee; max-width:600px; margin:20px auto; padding:20px; border-radius:12px; }
+  h1 { text-align:center; color:#ffd700; }
+  #output { background:#2e2e3e; padding:20px; border-radius:8px; margin-top:20px; white-space:pre-wrap; }
+  input[type=file] { margin-top:20px; }
+  .key { color:#4caf50; font-weight:bold; }
+  .value { color:#ffd700; }
+</style>
+</head>
+<body>
+
+<h1>JSON閲覧ツール</h1>
+<p>保存したキャラクター選択のJSONファイルを選択してください。</p>
+
+<input type="file" id="file-input" accept=".json">
+<div id="output"></div>
+
+<script>
+  function renderJSON(obj, indent=0){
+    let html = '';
+    const spacing = '  '.repeat(indent);
+    for(const key in obj){
+      const val = obj[key];
+      if(typeof val === 'object' && val !== null){
+        html += `${spacing}<span class="key">${key}</span>:\n${renderJSON(val, indent+1)}`;
+      } else {
+        html += `${spacing}<span class="key">${key}</span>: <span class="value">${val}</span>\n`;
+      }
+    }
+    return html;
+  }
+
+  document.getElementById('file-input').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+      try{
+        const data = JSON.parse(event.target.result);
+        document.getElementById('output').innerHTML = renderJSON(data);
+      } catch(err){
+        document.getElementById('output').textContent = 'JSONの解析に失敗しました: ' + err;
+      }
+    };
+    reader.readAsText(file);
+  });
+</script>
+
+</body>
+</html>
