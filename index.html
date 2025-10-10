@@ -35,7 +35,6 @@
       <label>衣装<select id="clothes" required></select></label>
     </div>
     <div class="form-row">
-      <label>体型<select id="body" required></select></label>
       <label>性別<select id="gender" required></select></label>
       <label>装飾<select id="accessory" required></select></label>
       <label>身長<input type="number" id="height" min="100" max="200" required>cm</label>
@@ -69,7 +68,6 @@ function populateSelect(id, start, end) {
 populateSelect("hair", 1, 47);
 populateSelect("eye", 1, 8);
 populateSelect("clothes", 1, 8);
-populateSelect("body", 1, 5);       // ← 体型を1～5に変更
 populateSelect("gender", 1, 3);
 populateSelect("accessory", 0, 19);
 
@@ -92,7 +90,6 @@ function confirmCharacter() {
   const hair = document.getElementById("hair").value;
   const eye = document.getElementById("eye").value;
   const clothes = document.getElementById("clothes").value;
-  const body = document.getElementById("body").value;
   const gender = document.getElementById("gender").value;
   const accessory = document.getElementById("accessory").value;
   const height = document.getElementById("height").value;
@@ -100,7 +97,7 @@ function confirmCharacter() {
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = `
     <p>${currentNickname}さんのキャラクター:</p>
-    <p>髪型:${hair}, 目:${eye}, 衣装:${clothes}, 体型:${body}, 性別:${gender}, 装飾:${accessory}, 身長:${height}cm</p>
+    <p>髪型:${hair}, 目:${eye}, 衣装:${clothes}, 性別:${gender}, 装飾:${accessory}, 身長:${height}cm</p>
     <p>でよろしいですか？</p>
     <button onclick="acceptCharacter()">はい</button>
     <button onclick="editCharacter()">いいえ</button>
@@ -114,7 +111,6 @@ function acceptCharacter() {
     hair: document.getElementById("hair").value,
     eye: document.getElementById("eye").value,
     clothes: document.getElementById("clothes").value,
-    body: document.getElementById("body").value,
     gender: document.getElementById("gender").value,
     accessory: document.getElementById("accessory").value,
     height: document.getElementById("height").value
@@ -139,7 +135,7 @@ function renderCharacterList() {
     const div = document.createElement("div");
     div.className = "character";
     div.innerHTML = `
-      ${c.nickname}さん: 髪型:${c.hair}, 目:${c.eye}, 衣装:${c.clothes}, 体型:${c.body}, 性別:${c.gender}, 装飾:${c.accessory}, 身長:${c.height}cm
+      ${c.nickname}さん: 髪型:${c.hair}, 目:${c.eye}, 衣装:${c.clothes}, 性別:${c.gender}, 装飾:${c.accessory}, 身長:${c.height}cm
       <button onclick="deleteCharacter(${characterList.indexOf(c)})">削除</button>
     `;
     summaryDiv.appendChild(div);
