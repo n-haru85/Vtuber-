@@ -1,148 +1,148 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>キャラクター作成</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .form-row { margin-top: 10px; }
-        label { margin-right: 15px; }
-        select, input[type="number"] { width: 70px; }
-        button { margin-top: 10px; }
-        .result { margin-top: 20px; }
-        .summary { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
-        .summary div.character { margin-bottom: 10px; }
-    </style>
+<meta charset="UTF-8">
+<title>キャラクター作成</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  .form-row { margin-top: 10px; }
+  label { margin-right: 15px; }
+  select, input[type="number"] { width: 80px; }
+  button { margin-top: 10px; cursor: pointer; }
+  .result { margin-top: 20px; }
+  .summary { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+  .summary div.character { margin-bottom: 10px; }
+</style>
 </head>
 <body>
 
 <h1>キャラクター作成</h1>
 
 <form id="characterForm">
-    <div class="form-row">
-        <label>髪型
-            <select id="hear" required></select>
-        </label>
-        <label>目
-            <select id="eye" required></select>
-        </label>
-        <label>衣装
-            <select id="clorthes" required></select>
-        </label>
-    </div>
+  <div class="form-row">
+    <label>髪型
+      <select id="hair" required></select>
+    </label>
+    <label>目
+      <select id="eye" required></select>
+    </label>
+    <label>衣装
+      <select id="clothes" required></select>
+    </label>
+  </div>
 
-    <div class="form-row">
-        <label>体型
-            <select id="taikei" required></select>
-        </label>
-        <label>性別
-            <select id="seibetu" required></select>
-        </label>
-        <label>装飾
-            <select id="sousyoku" required></select>
-        </label>
-        <label>身長
-            <input type="number" id="sintyo" min="100" max="200" required>cm
-        </label>
-    </div>
+  <div class="form-row">
+    <label>体型
+      <select id="body" required></select>
+    </label>
+    <label>性別
+      <select id="gender" required></select>
+    </label>
+    <label>装飾
+      <select id="accessory" required></select>
+    </label>
+    <label>身長
+      <input type="number" id="height" min="100" max="200" required> cm
+    </label>
+  </div>
 
-    <button type="button" onclick="confirmCharacter()">確認</button>
+  <button type="button" onclick="confirmCharacter()">確認</button>
 </form>
 
 <div class="result" id="result"></div>
 
 <div class="summary" id="summary">
-    <h2>確定したキャラクター一覧</h2>
+  <h2>確定したキャラクター一覧</h2>
 </div>
 
 <script>
 let characterList = [];
 
-// ドロップダウンを自動生成
 function populateSelect(id, start, end) {
-    const select = document.getElementById(id);
-    for (let i = start; i <= end; i++) {
-        const option = document.createElement("option");
-        option.value = i;
-        option.text = i;
-        select.appendChild(option);
-    }
+  const select = document.getElementById(id);
+  for (let i = start; i <= end; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.text = i;
+    select.appendChild(option);
+  }
 }
 
-// 各項目の選択肢を生成
-populateSelect("hear", 1, 47);
+populateSelect("hair", 1, 47);
 populateSelect("eye", 1, 8);
-populateSelect("clorthes", 1, 8);
-populateSelect("taikei", 1, 4);
-populateSelect("seibetu", 1, 3);
-populateSelect("sousyoku", 0, 19);
+populateSelect("clothes", 1, 8);
+populateSelect("body", 1, 4);
+populateSelect("gender", 1, 3);
+populateSelect("accessory", 0, 19);
 
 function confirmCharacter() {
-    const hear = document.getElementById("hear").value;
-    const eye = document.getElementById("eye").value;
-    const clorthes = document.getElementById("clorthes").value;
-    const taikei = document.getElementById("taikei").value;
-    const seibetu = document.getElementById("seibetu").value;
-    const sousyoku = document.getElementById("sousyoku").value;
-    const sintyo = document.getElementById("sintyo").value;
+  const hair = document.getElementById("hair").value;
+  const eye = document.getElementById("eye").value;
+  const clothes = document.getElementById("clothes").value;
+  const body = document.getElementById("body").value;
+  const gender = document.getElementById("gender").value;
+  const accessory = document.getElementById("accessory").value;
+  const height = document.getElementById("height").value;
 
-    if (sintyo < 100 || sintyo > 200) {
-        alert("身長は100～200cmで入力してください。");
-        return;
-    }
-
-    const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = `
-        <p>髪型: ${hear}, 目: ${eye}, 衣装: ${clorthes}, 体型: ${taikei}, 性別: ${seibetu}, 装飾: ${sousyoku}, 身長: ${sintyo}cm</p>
-        <p>でよろしいですか？</p>
-        <button onclick="acceptCharacter()">はい</button>
-        <button onclick="editCharacter()">いいえ</button>
-    `;
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = `
+    <p>髪型: ${hair}, 目: ${eye}, 衣装: ${clothes}, 体型: ${body}, 性別: ${gender}, 装飾: ${accessory}, 身長: ${height}cm</p>
+    <p>でよろしいですか？</p>
+    <button onclick="acceptCharacter()">はい</button>
+    <button onclick="editCharacter()">いいえ</button>
+  `;
 }
 
 function acceptCharacter() {
-    const character = {
-        hear: document.getElementById("hear").value,
-        eye: document.getElementById("eye").value,
-        clorthes: document.getElementById("clorthes").value,
-        taikei: document.getElementById("taikei").value,
-        seibetu: document.getElementById("seibetu").value,
-        sousyoku: document.getElementById("sousyoku").value,
-        sintyo: document.getElementById("sintyo").value
-    };
+  const character = {
+    hair: document.getElementById("hair").value,
+    eye: document.getElementById("eye").value,
+    clothes: document.getElementById("clothes").value,
+    body: document.getElementById("body").value,
+    gender: document.getElementById("gender").value,
+    accessory: document.getElementById("accessory").value,
+    height: document.getElementById("height").value
+  };
 
-    characterList.push(character);
-    renderCharacterList();
+  characterList.push(character);
+  renderCharacterList();
 
-    document.getElementById("result").innerHTML = "<p>選択ありがとうございました。</p>";
-    document.getElementById("characterForm").reset();
+  document.getElementById("result").innerHTML = "<p>選択ありがとうございました。</p>";
+  document.getElementById("characterForm").reset();
 }
 
 function renderCharacterList() {
-    const summaryDiv = document.getElementById("summary");
-    summaryDiv.innerHTML = "<h2>確定したキャラクター一覧</h2>";
+  const summaryDiv = document.getElementById("summary");
+  summaryDiv.innerHTML = "<h2>確定したキャラクター一覧</h2>";
 
-    characterList.forEach((c, index) => {
-        const div = document.createElement("div");
-        div.className = "character";
-        div.innerHTML = `
-            <strong>${index + 1}:</strong>
-            髪型:${c.hear}, 目:${c.eye}, 衣装:${c.clorthes}, 体型:${c.taikei}, 性別:${c.seibetu}, 装飾:${c.sousyoku}, 身長:${c.sintyo}cm
-            <button onclick="deleteCharacter(${index})">削除</button>
-        `;
-        summaryDiv.appendChild(div);
-    });
+  characterList.forEach((c, index) => {
+    const div = document.createElement("div");
+    div.className = "character";
+    div.innerHTML = `
+      <strong>${index + 1}:</strong>
+      髪型:${c.hair}, 目:${c.eye}, 衣装:${c.clothes}, 体型:${c.body}, 性別:${c.gender}, 装飾:${c.accessory}, 身長:${c.height}cm
+      <button onclick="deleteCharacter(${index})">削除</button>
+    `;
+    summaryDiv.appendChild(div);
+  });
 }
 
 function deleteCharacter(index) {
-    characterList.splice(index, 1);
-    renderCharacterList();
+  characterList.splice(index, 1);
+  renderCharacterList();
 }
 
 function editCharacter() {
-    document.getElementById("result").innerHTML = "<p>もう一度選択してください。</p>";
+  document.getElementById("result").innerHTML = `
+    <p>もう一度選択してください。</p>
+    <button onclick="resetForm()">OK</button>
+  `;
+}
+
+function resetForm() {
+  document.getElementById("characterForm").reset();
+  document.getElementById("result").innerHTML = "";
 }
 </script>
-
 </body>
 </html>
