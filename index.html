@@ -5,6 +5,7 @@
 <title>キャラクター作成</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 20px; }
+  .hidden { display: none; }
   .form-row { margin-top: 10px; }
   label { margin-right: 15px; }
   select, input[type="number"] { width: 80px; }
@@ -12,52 +13,56 @@
   .result { margin-top: 20px; }
   .summary { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
   .summary div.character { margin-bottom: 10px; }
+  .preview { margin-top: 20px; }
+  .preview img { width: 100px; height: 100px; margin-right: 10px; }
 </style>
 </head>
 <body>
 
 <h1>キャラクター作成</h1>
 
-<form id="characterForm">
-  <div class="form-row">
-    <label>髪型
-      <select id="hair" required></select>
-    </label>
-    <label>目
-      <select id="eye" required></select>
-    </label>
-    <label>衣装
-      <select id="clothes" required></select>
-    </label>
-  </div>
+<!-- ニックネーム入力画面 -->
+<div id="nicknameScreen">
+  <p>ニックネームを入力してください（30字まで）:</p>
+  <input type="text" id="nicknameInput" maxlength="30">
+  <button onclick="confirmNickname()">確認</button>
+</div>
 
-  <div class="form-row">
-    <label>体型
-      <select id="body" required></select>
-    </label>
-    <label>性別
-      <select id="gender" required></select>
-    </label>
-    <label>装飾
-      <select id="accessory" required></select>
-    </label>
-    <label>身長
-      <input type="number" id="height" min="100" max="200" required> cm
-    </label>
-  </div>
+<!-- キャラクター選択画面 -->
+<div id="characterScreen" class="hidden">
+  <form id="characterForm">
+    <div class="form-row">
+      <label>髪型<select id="hair" onchange="updatePreview()" required></select></label>
+      <label>目<select id="eye" onchange="updatePreview()" required></select></label>
+      <label>衣装<select id="clothes" onchange="updatePreview()" required></select></label>
+    </div>
+    <div class="form-row">
+      <label>体型<select id="body" required></select></label>
+      <label>性別<select id="gender" required></select></label>
+      <label>装飾<select id="accessory" required></select></label>
+      <label>身長<input type="number" id="height" min="100" max="200" required>cm</label>
+    </div>
+    <div class="preview" id="preview">
+      <p>選択したパーツをプレビュー</p>
+      <img id="hairPreview" src="" alt="髪型">
+      <img id="eyePreview" src="" alt="目">
+      <img id="clothesPreview" src="" alt="衣装">
+    </div>
+    <button type="button" onclick="confirmCharacter()">確認</button>
+  </form>
+  <div class="result" id="result"></div>
+</div>
 
-  <button type="button" onclick="confirmCharacter()">確認</button>
-</form>
-
-<div class="result" id="result"></div>
-
+<!-- 確定キャラクター一覧 -->
 <div class="summary" id="summary">
   <h2>確定したキャラクター一覧</h2>
 </div>
 
 <script>
 let characterList = [];
+let currentNickname = "";
 
+// ドロップダウン生成
 function populateSelect(id, start, end) {
   const select = document.getElementById(id);
   for (let i = start; i <= end; i++) {
@@ -68,13 +73,43 @@ function populateSelect(id, start, end) {
   }
 }
 
-populateSelect("hair", 1, 47);
-populateSelect("eye", 1, 8);
-populateSelect("clothes", 1, 8);
+// 選択肢の初期化
+populateSelect("hair", 1, 10);
+populateSelect("eye", 1, 5);
+populateSelect("clothes", 1, 5);
 populateSelect("body", 1, 4);
 populateSelect("gender", 1, 3);
-populateSelect("accessory", 0, 19);
+populateSelect("accessory", 0, 10);
 
+// ニックネーム確認
+function confirmNickname() {
+  const nickname = document.getElementById("nicknameInput").value.trim();
+  if (!nickname) { alert("ニックネームを入力してください。"); return; }
+
+  if (confirm(`ニックネームは「${nickname}」でよろしいですか？`)) {
+    currentNickname = nickname;
+
+    // 画面切り替え
+    document.getElementById("nicknameScreen").classList.add("hidden");
+    document.getElementById("characterScreen").classList.remove("hidden");
+
+    // 初期プレビュー更新
+    updatePreview();
+  }
+}
+
+// プレビュー更新
+function updatePreview() {
+  const hair = document.getElementById("hair").value;
+  const eye = document.getElementById("eye").value;
+  const clothes = document.getElementById("clothes").value;
+
+  document.getElementById("hairPreview").src = `images/hair${hair}.png`;
+  document.getElementById("eyePreview").src = `images/eye${eye}.png`;
+  document.getElementById("clothesPreview").src = `images/clothes${clothes}.png`;
+}
+
+// キャラクター確認
 function confirmCharacter() {
   const hair = document.getElementById("hair").value;
   const eye = document.getElementById("eye").value;
@@ -86,15 +121,18 @@ function confirmCharacter() {
 
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = `
-    <p>髪型: ${hair}, 目: ${eye}, 衣装: ${clothes}, 体型: ${body}, 性別: ${gender}, 装飾: ${accessory}, 身長: ${height}cm</p>
+    <p>${currentNickname}さんのキャラクター:</p>
+    <p>髪型:${hair}, 目:${eye}, 衣装:${clothes}, 体型:${body}, 性別:${gender}, 装飾:${accessory}, 身長:${height}cm</p>
     <p>でよろしいですか？</p>
     <button onclick="acceptCharacter()">はい</button>
     <button onclick="editCharacter()">いいえ</button>
   `;
 }
 
+// キャラクター確定
 function acceptCharacter() {
   const character = {
+    nickname: currentNickname,
     hair: document.getElementById("hair").value,
     eye: document.getElementById("eye").value,
     clothes: document.getElementById("clothes").value,
@@ -109,18 +147,25 @@ function acceptCharacter() {
 
   document.getElementById("result").innerHTML = "<p>選択ありがとうございました。</p>";
   document.getElementById("characterForm").reset();
+
+  // 画面切り替え：ニックネーム入力画面に戻す
+  document.getElementById("characterScreen").classList.add("hidden");
+  document.getElementById("nicknameScreen").classList.remove("hidden");
 }
 
+// キャラクター一覧表示
 function renderCharacterList() {
   const summaryDiv = document.getElementById("summary");
   summaryDiv.innerHTML = "<h2>確定したキャラクター一覧</h2>";
-
   characterList.forEach((c, index) => {
     const div = document.createElement("div");
     div.className = "character";
     div.innerHTML = `
-      <strong>${index + 1}:</strong>
-      髪型:${c.hair}, 目:${c.eye}, 衣装:${c.clothes}, 体型:${c.body}, 性別:${c.gender}, 装飾:${c.accessory}, 身長:${c.height}cm
+      <strong>${index + 1}:</strong> ニックネーム: ${c.nickname}, 髪型:${c.hair}, 目:${c.eye}, 衣装:${c.clothes}, 体型:${c.body}, 性別:${c.gender}, 装飾:${c.accessory}, 身長:${c.height}cm
+      <br>
+      <img src="images/hair${c.hair}.png" width="50" height="50">
+      <img src="images/eye${c.eye}.png" width="50" height="50">
+      <img src="images/clothes${c.clothes}.png" width="50" height="50">
       <button onclick="deleteCharacter(${index})">削除</button>
     `;
     summaryDiv.appendChild(div);
@@ -132,17 +177,12 @@ function deleteCharacter(index) {
   renderCharacterList();
 }
 
+// 編集ボタン押下
 function editCharacter() {
-  document.getElementById("result").innerHTML = `
-    <p>もう一度選択してください。</p>
-    <button onclick="resetForm()">OK</button>
-  `;
-}
-
-function resetForm() {
-  document.getElementById("characterForm").reset();
-  document.getElementById("result").innerHTML = "";
+  document.getElementById("result").innerHTML = "<p>もう一度選択してください。</p>";
+  updatePreview();
 }
 </script>
+
 </body>
 </html>
